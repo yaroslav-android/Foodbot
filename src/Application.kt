@@ -14,6 +14,7 @@ import io.ktor.gson.gson
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.path
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
@@ -62,6 +63,11 @@ fun Application.module(testing: Boolean = false) {
 
                 log.debug(response.call.receive())
             }
+        }
+
+        post("user_interactions") {
+            log.debug(call.receiveParameters().toString())
+            call.respond(HttpStatusCode.OK, "")
         }
 
         get("/html-dsl") {
@@ -133,6 +139,7 @@ fun getModalBody(): String {
         [
         	{
         		"type": "input",
+                "block_id": "input1",
         		"element": {
         			"type": "plain_text_input",
         			"action_id": "sl_input",
@@ -152,6 +159,7 @@ fun getModalBody(): String {
         	},
         	{
         		"type": "input",
+                "block_id": "input2",
         		"element": {
         			"type": "plain_text_input",
         			"action_id": "ml_input",
