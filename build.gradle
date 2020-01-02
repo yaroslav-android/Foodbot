@@ -1,11 +1,17 @@
 buildscript {
+    apply from: 'token.gradle'
+
     repositories {
         jcenter()
     }
-    
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
+}
+
+plugins {
+    id("com.github.gmazzo.buildconfig") version "1.6.2"
 }
 
 apply plugin: 'kotlin'
@@ -27,6 +33,11 @@ repositories {
     jcenter()
     maven { url 'https://kotlin.bintray.com/ktor' }
     maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
+}
+
+buildConfig {
+    buildConfigField("String", "TOKEN", "\"${token.app}\"")
+    packageName("team.uptech.food.bot")
 }
 
 dependencies {

@@ -28,7 +28,8 @@ import org.slf4j.event.Level
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
-@Suppress("unused") // Referenced in application.conf
+// Referenced in application.conf
+@Suppress("unused")
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
     install(DefaultHeaders)
@@ -104,10 +105,11 @@ fun Application.module(testing: Boolean = false) {
 }
 
 fun getToken(): String {
-    TODO("not implemented")
+    TODO("extract into separate class & pass token remotely")
 }
 
 fun getModal(withTriggerId: String): String {
+    // TODO: extract into separate class
     return """
         {
   "trigger_id": "$withTriggerId",
@@ -135,6 +137,7 @@ fun getModal(withTriggerId: String): String {
 }
 
 fun getModalBody(): String {
+    // TODO: extract into separate class
     return """
         [
         	{
