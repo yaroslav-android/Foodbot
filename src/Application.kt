@@ -52,7 +52,7 @@ fun Application.module(testing: Boolean = false) {
         }
 
         post("/new_order") {
-            val id = call.receiveParameters().get("trigger_id")
+            val id = call.receiveParameters()["trigger_id"]
             call.respond("Let me try..")
 
             if (!id.isNullOrBlank()) {
