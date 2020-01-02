@@ -1,6 +1,9 @@
 package team.uptech.food.bot
 
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.call
 import io.ktor.client.call.receive
@@ -11,7 +14,6 @@ import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.gson.gson
-import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -22,9 +24,10 @@ import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
-import kotlinx.css.*
-import kotlinx.html.*
 import org.slf4j.event.Level
+import team.uptech.food.bot.bot.Bot
+import team.uptech.food.bot.bot.BotReplay
+import team.uptech.food.bot.slack.API
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -32,33 +35,34 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused")
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+
     install(DefaultHeaders)
+
     install(ContentNegotiation) {
-        gson {
-            setPrettyPrinting()
-        }
-    }
-    install(CallLogging) {
-        level = Level.INFO
-        filter { call -> call.request.path().startsWith("/new_order") }
+        gson { setPrettyPrinting() }
     }
 
-    val client = HttpClient(Apache) {
+    install(CallLogging) {
+        level = Level.DEBUG
+        filter { call -> call.request.path().startsWith(Bot.NEW_ORDER_PATH) }
     }
+
+    val client = HttpClient(Apache)
+    val botReplay = BotReplay()
 
     routing {
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
+        get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
 
-        post("/new_order") {
-            val id = call.receiveParameters()["trigger_id"]
-            call.respond("Let me try..")
+        post(Bot.NEW_ORDER_PATH) {
+            // No respond needed.
+            val id = call.receiveParameters()[API.TRIGGER_ID]
 
             if (!id.isNullOrBlank()) {
-                val response = client.call("https://slack.com/api/views.open") {
+                // TODO: extract into API extension
+                // TODO: pass type of modal and assemble it
+                val response = client.call(API.VIEW_OPEN) {
                     method = HttpMethod.Post
-                    header("Authorization", "Bearer ${getToken()}")
+                    header(API.HEADER, API.header(getToken()))
                     body = TextContent(getModal(withTriggerId = id), contentType = ContentType.Application.Json)
                 }.response
 
@@ -66,40 +70,9 @@ fun Application.module(testing: Boolean = false) {
             }
         }
 
-        post("user_interactions") {
+        post(Bot.USER_INTERACTIONS) {
             log.debug(call.receiveParameters().toString())
             call.respond(HttpStatusCode.OK, "")
-        }
-
-        get("/html-dsl") {
-            call.respondHtml {
-                body {
-                    h1 { +"HTML" }
-                    ul {
-                        for (n in 1..10) {
-                            li { +"$n" }
-                        }
-                    }
-                }
-            }
-        }
-
-        get("/styles.css") {
-            call.respondCss {
-                body {
-                    backgroundColor = Color.red
-                }
-                p {
-                    fontSize = 2.em
-                }
-                rule("p.myclass") {
-                    color = Color.blue
-                }
-            }
-        }
-
-        get("/json/gson") {
-            call.respond(mapOf("hello" to "world"))
         }
     }
 }
@@ -183,18 +156,4 @@ fun getModalBody(): String {
         	}
         ]
     """.trimIndent()
-}
-
-fun FlowOrMetaDataContent.styleCss(builder: CSSBuilder.() -> Unit) {
-    style(type = ContentType.Text.CSS.toString()) {
-        +CSSBuilder().apply(builder).toString()
-    }
-}
-
-fun CommonAttributeGroupFacade.style(builder: CSSBuilder.() -> Unit) {
-    this.style = CSSBuilder().apply(builder).toString().trim()
-}
-
-suspend inline fun ApplicationCall.respondCss(builder: CSSBuilder.() -> Unit) {
-    this.respondText(CSSBuilder().apply(builder).toString(), ContentType.Text.CSS)
 }
