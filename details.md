@@ -1,2 +1,3 @@
 # Commands
-`/niam new order` - create new order, opens modal
+`/new_order` - create new order, opens modal
+# Flow
