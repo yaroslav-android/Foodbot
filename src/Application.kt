@@ -54,7 +54,7 @@ fun Application.module(testing: Boolean = false) {
         get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
 
         post(Bot.NEW_ORDER_PATH) {
-            // No respond needed.
+
             val id = call.receiveParameters()[API.TRIGGER_ID]
 
             if (!id.isNullOrBlank()) {
@@ -68,18 +68,18 @@ fun Application.module(testing: Boolean = false) {
 
                 log.debug(response.call.receive())
             }
+
+            call.respond(HttpStatusCode.OK, "")
         }
 
         post(Bot.USER_INTERACTIONS) {
-            log.debug(call.receiveParameters().toString())
+            log.debug(call.receiveParameters().entries().toString())
             call.respond(HttpStatusCode.OK, "")
         }
     }
 }
 
-fun getToken(): String {
-    TODO("extract into separate class & pass token remotely")
-}
+fun getToken() = System.getenv()[Bot.TOKEN] ?: ""
 
 fun getModal(withTriggerId: String): String {
     // TODO: extract into separate class
