@@ -120,6 +120,18 @@ fun Application.module(testing: Boolean = false) {
         post(Bot.USER_INTERACTIONS) {
             log.debug(call.receiveParameters().entries().toString())
             call.respond(HttpStatusCode.OK, "")
+
+            // TODO: add fields validation for modals
+            /*call.respondText( // input1 -> block_id
+                """
+                {
+                  "response_action": "errors",
+                  "errors": {
+                    "input1": "You may not select a due date in the past"
+                  }
+                }
+            """.trimIndent(), ContentType.Application.Json, HttpStatusCode.OK
+            )*/
         }
     }
 }
