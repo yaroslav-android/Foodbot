@@ -1,5 +1,7 @@
 package team.uptech.food.bot
 
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -9,6 +11,7 @@ import io.ktor.client.call.call
 import io.ktor.client.call.receive
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.content.TextContent
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
@@ -49,6 +52,8 @@ fun Application.module(testing: Boolean = false) {
 
     val client = HttpClient(Apache)
     val botReplay = BotReplay()
+    // TODO: put all needed data from this object into Initiator
+    var userProfile = JsonObject()
 
     routing {
         get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
@@ -60,6 +65,7 @@ fun Application.module(testing: Boolean = false) {
             val parameters = call.receiveParameters()
             log.debug(parameters.entries().toString())
             val id = parameters[API.TRIGGER_ID]
+            val userId = parameters[API.USER_ID]
 
             if (!id.isNullOrBlank()) {
                 // TODO: extract into API extension
@@ -70,7 +76,23 @@ fun Application.module(testing: Boolean = false) {
                     body = TextContent(getModal(withTriggerId = id), contentType = ContentType.Application.Json)
                 }.response
 
+                // get "view":{"id":"VS5L99ZD1" to update modal, keep it
                 log.debug(response.call.receive())
+            }
+
+            // TODO: this profile info of initiator should be saved in future
+            val response = client.call(API.USER_PROFILE) {
+                method = HttpMethod.Get
+                header(API.HEADER, API.header(getToken()))
+                parameter("token", getBotToken())
+                parameter("user", userId)
+            }.response
+
+            response.call.receive<String>().also {
+                if (it.isNotBlank()) {
+                    userProfile = JsonParser().parse(it) as JsonObject
+                    log.debug(it)
+                }
             }
 
             call.respondText(getMessage(), ContentType.Application.Json)
@@ -86,6 +108,15 @@ fun Application.module(testing: Boolean = false) {
             */
         }
 
+        post(Bot.MANUAL_RESET_PATH) {
+            val parameters = call.receiveParameters()
+            log.debug(parameters.entries().toString())
+            val userId = parameters[API.USER_ID]
+            // TODO: drop all data related to user and his initiated an order.
+            //  consider add confirmation dialog if user just wanted to check how it behaves in the middle of the order
+            call.respondText("${userProfile["profile"].asJsonObject["first_name"].asString}, you now able to initiate a new order :stew:")
+        }
+
         post(Bot.USER_INTERACTIONS) {
             log.debug(call.receiveParameters().entries().toString())
             call.respond(HttpStatusCode.OK, "")
@@ -94,6 +125,8 @@ fun Application.module(testing: Boolean = false) {
 }
 
 fun getToken() = System.getenv()[Bot.TOKEN] ?: ""
+
+fun getBotToken() = System.getenv()[Bot.BOT_TOKEN] ?: ""
 
 fun getModal(withTriggerId: String): String {
     // TODO: extract into separate class

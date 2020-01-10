@@ -1,4 +1,4 @@
-package team.uptech.food.bot.order.routing
+package team.uptech.food.bot.initiation
 
 class Initiator {
 }

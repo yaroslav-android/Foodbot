@@ -2,6 +2,7 @@ package team.uptech.food.bot.slack.interactions
 
 import com.google.gson.annotations.SerializedName
 
+// TODO: consider to drop it
 data class UserInteractionPayload(
     val sender: Sender,
     @SerializedName("trigger_id")
