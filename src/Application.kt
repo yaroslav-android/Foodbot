@@ -54,8 +54,12 @@ fun Application.module(testing: Boolean = false) {
         get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
 
         post(Bot.NEW_ORDER_PATH) {
-
-            val id = call.receiveParameters()[API.TRIGGER_ID]
+            // TODO: save CHANNEL_ID, USER_ID, USER_NAME as initiator
+            // TODO: check if a user has already started order ( decline drops after successful or canceled order )
+            // TODO: make sure that we locked on channel from where user requested the order
+            val parameters = call.receiveParameters()
+            log.debug(parameters.entries().toString())
+            val id = parameters[API.TRIGGER_ID]
 
             if (!id.isNullOrBlank()) {
                 // TODO: extract into API extension
@@ -69,7 +73,17 @@ fun Application.module(testing: Boolean = false) {
                 log.debug(response.call.receive())
             }
 
-            call.respond(HttpStatusCode.OK, "")
+            call.respondText(getMessage(), ContentType.Application.Json)
+
+            /* keep for future usage ->>
+            val response = client.call(API.SEND_MSG) {
+                method = HttpMethod.Post
+                header(API.HEADER, API.header(getToken()))
+                body = TextContent(getMessage(), contentType = ContentType.Application.Json)
+            }.response
+
+            log.debug(response.call.receive())
+            */
         }
 
         post(Bot.USER_INTERACTIONS) {
@@ -111,6 +125,7 @@ fun getModal(withTriggerId: String): String {
 
 fun getModalBody(): String {
     // TODO: extract into separate class
+    //TODO: setup cta/fields custom ids and data
     return """
         [
         	{
@@ -153,6 +168,82 @@ fun getModalBody(): String {
         			"type": "plain_text",
         			"text": "Hint text"
         		}
+        	}
+        ]
+    """.trimIndent()
+}
+
+fun getMessage(): String {
+    // TODO: extract into separate class
+    return """
+    {
+     "channel": "CR1E4P198",
+     "blocks": ${getMessageBody()}
+    }
+}
+    """.trimIndent()
+}
+
+fun getMessageBody(): String {
+    //TODO: setup cta/fields custom ids and data
+    return """
+        [
+        	{
+        		"type": "section",
+        		"text": {
+        			"type": "mrkdwn",
+        			"text": "You have a new request:\n*<fakeLink.toEmployeeProfile.com|Fred Enriquez - New device request>*"
+        		}
+        	},
+        	{
+        		"type": "section",
+        		"fields": [
+        			{
+        				"type": "mrkdwn",
+        				"text": "*Type:*\nComputer (laptop)"
+        			},
+        			{
+        				"type": "mrkdwn",
+        				"text": "*When:*\nSubmitted Aut 10"
+        			},
+        			{
+        				"type": "mrkdwn",
+        				"text": "*Last Update:*\nMar 10, 2015 (3 years, 5 months)"
+        			},
+        			{
+        				"type": "mrkdwn",
+        				"text": "*Reason:*\nAll vowel keys aren't working."
+        			},
+        			{
+        				"type": "mrkdwn",
+        				"text": "*Specs:*\n\"Cheetah Pro 15\" - Fast, really fast\""
+        			}
+        		]
+        	},
+        	{
+        		"type": "actions",
+        		"elements": [
+        			{
+        				"type": "button",
+        				"text": {
+        					"type": "plain_text",
+        					"emoji": true,
+        					"text": "Approve"
+        				},
+        				"style": "primary",
+        				"value": "click_me_123"
+        			},
+        			{
+        				"type": "button",
+        				"text": {
+        					"type": "plain_text",
+        					"emoji": true,
+        					"text": "Deny"
+        				},
+        				"style": "danger",
+        				"value": "click_me_123"
+        			}
+        		]
         	}
         ]
     """.trimIndent()
