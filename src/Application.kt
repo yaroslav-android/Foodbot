@@ -1,7 +1,9 @@
 package team.uptech.food.bot
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.annotations.SerializedName
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -30,6 +32,10 @@ import io.ktor.routing.routing
 import org.slf4j.event.Level
 import team.uptech.food.bot.bot.Bot
 import team.uptech.food.bot.bot.BotReplay
+import team.uptech.food.bot.bot.db.DataStorage
+import team.uptech.food.bot.bot.db.Storage
+import team.uptech.food.bot.modals.BaseModal
+import team.uptech.food.bot.modals.NewOrderModal
 import team.uptech.food.bot.slack.API
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -39,188 +45,188 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-    install(DefaultHeaders)
+  install(DefaultHeaders)
 
-    install(ContentNegotiation) {
-        gson { setPrettyPrinting() }
+  install(ContentNegotiation) {
+    gson { setPrettyPrinting() }
+  }
+
+  install(CallLogging) {
+    level = Level.DEBUG
+    filter { call -> call.request.path().startsWith(Bot.NEW_ORDER_PATH) }
+  }
+
+  val client = HttpClient(Apache)
+  val botReplay = BotReplay()
+  // TODO: put all needed data from this object into Initiator
+  var userProfile = JsonObject()
+  val newOrderModal: BaseModal = NewOrderModal()
+
+  val storage: Storage = DataStorage()
+
+  routing {
+    get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
+
+    post(Bot.NEW_ORDER_PATH) {
+      // TODO: save CHANNEL_ID, USER_ID as initiator
+      // TODO: check if a user has already started order ( decline drops after successful or canceled order )
+      // TODO: make sure that we locked on channel from where user requested the order
+      val parameters = call.receiveParameters()
+      log.debug(parameters.entries().toString())
+      val triggerId = parameters[API.TRIGGER_ID]
+      val userId = parameters[API.USER_ID]
+      val channelId = parameters[API.CHANNEL_ID]
+
+      if (!triggerId.isNullOrBlank()) {
+        // TODO: extract into API extension
+        // TODO: pass type of modal and assemble it
+        val response = client.call(API.VIEW_OPEN) {
+          method = HttpMethod.Post
+          header(API.HEADER, API.header(getToken()))
+          body = TextContent(newOrderModal.assemble(triggerId), contentType = ContentType.Application.Json)
+        }.response
+
+        // get "view":{"id":"VS5L99ZD1" to update modal, keep it
+        log.debug(response.call.receive())
+      }
+
+      // TODO: this profile info of initiator should be saved in future
+      val response = client.call(API.USER_PROFILE) {
+        method = HttpMethod.Get
+        header(API.HEADER, API.header(getToken()))
+        parameter("token", getBotToken())
+        parameter("user", userId)
+      }.response
+
+      response.call.receive<String>().also {
+        if (it.isNotBlank()) {
+          userProfile = JsonParser().parse(it) as JsonObject
+          log.debug(it)
+        }
+      }
+
+//            call.respondText(getMessage(), ContentType.Application.Json)
+      call.respond(HttpStatusCode.OK, "")
+
+      /* keep for future usage ->>
+      val response = client.call(API.SEND_MSG) {
+          method = HttpMethod.Post
+          header(API.HEADER, API.header(getToken()))
+          body = TextContent(getMessage(), contentType = ContentType.Application.Json)
+      }.response
+
+      log.debug(response.call.receive())
+      */
     }
 
-    install(CallLogging) {
-        level = Level.DEBUG
-        filter { call -> call.request.path().startsWith(Bot.NEW_ORDER_PATH) }
+    post(Bot.MANUAL_RESET_PATH) {
+      val parameters = call.receiveParameters()
+      log.debug(parameters.entries().toString())
+//            val userId = parameters[API.USER_ID]
+      // TODO: drop all data related to user and his initiated an order.
+      //  consider add confirmation dialog if user just wanted to check how it behaves in the middle of the order
+      call.respondText("${userProfile["profile"].asJsonObject["first_name"].asString}, you now able to initiate a new order :stew:")
     }
 
-    val client = HttpClient(Apache)
-    val botReplay = BotReplay()
-    // TODO: put all needed data from this object into Initiator
-    var userProfile = JsonObject()
+    post(Bot.USER_INTERACTIONS) {
+      val parameters = call.receiveParameters()
+      log.debug(parameters.entries().toString())
 
-    routing {
-        get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
+      val view = Gson().fromJson(parameters["payload"], CallbackId::class.java)
 
-        post(Bot.NEW_ORDER_PATH) {
-            // TODO: save CHANNEL_ID, USER_ID, USER_NAME as initiator
-            // TODO: check if a user has already started order ( decline drops after successful or canceled order )
-            // TODO: make sure that we locked on channel from where user requested the order
-            val parameters = call.receiveParameters()
-            log.debug(parameters.entries().toString())
-            val id = parameters[API.TRIGGER_ID]
-            val userId = parameters[API.USER_ID]
+      if (view?.view != null && "order_initiation" == view.view.callbackId) {
+        val response = client.call(API.SEND_MSG_EPH) {
+          method = HttpMethod.Post
+          header(API.HEADER, API.header(getToken()))
+          body = TextContent(getControlMenuMessage(view.user.id), contentType = ContentType.Application.Json)
+        }.response
+        log.debug(response.call.receive())
 
-            if (!id.isNullOrBlank()) {
-                // TODO: extract into API extension
-                // TODO: pass type of modal and assemble it
-                val response = client.call(API.VIEW_OPEN) {
-                    method = HttpMethod.Post
-                    header(API.HEADER, API.header(getToken()))
-                    body = TextContent(getModal(withTriggerId = id), contentType = ContentType.Application.Json)
-                }.response
+        call.respond(HttpStatusCode.OK, "")
+      } else {
+        call.respond(HttpStatusCode.OK, "")
+      }
 
-                // get "view":{"id":"VS5L99ZD1" to update modal, keep it
-                log.debug(response.call.receive())
+      /* user input from modal ->
+      "view": {
+          "state": {
+              "values": {
+      */
+
+      // TODO: add fields validation for modals
+      /*call.respondText( // input1 -> block_id
+          """
+          {
+            "response_action": "errors",
+            "errors": {
+              "input1": "You may not select a due date in the past"
             }
-
-            // TODO: this profile info of initiator should be saved in future
-            val response = client.call(API.USER_PROFILE) {
-                method = HttpMethod.Get
-                header(API.HEADER, API.header(getToken()))
-                parameter("token", getBotToken())
-                parameter("user", userId)
-            }.response
-
-            response.call.receive<String>().also {
-                if (it.isNotBlank()) {
-                    userProfile = JsonParser().parse(it) as JsonObject
-                    log.debug(it)
-                }
-            }
-
-            call.respondText(getMessage(), ContentType.Application.Json)
-
-            /* keep for future usage ->>
-            val response = client.call(API.SEND_MSG) {
-                method = HttpMethod.Post
-                header(API.HEADER, API.header(getToken()))
-                body = TextContent(getMessage(), contentType = ContentType.Application.Json)
-            }.response
-
-            log.debug(response.call.receive())
-            */
-        }
-
-        post(Bot.MANUAL_RESET_PATH) {
-            val parameters = call.receiveParameters()
-            log.debug(parameters.entries().toString())
-            val userId = parameters[API.USER_ID]
-            // TODO: drop all data related to user and his initiated an order.
-            //  consider add confirmation dialog if user just wanted to check how it behaves in the middle of the order
-            call.respondText("${userProfile["profile"].asJsonObject["first_name"].asString}, you now able to initiate a new order :stew:")
-        }
-
-        post(Bot.USER_INTERACTIONS) {
-            log.debug(call.receiveParameters().entries().toString())
-            call.respond(HttpStatusCode.OK, "")
-
-            // TODO: add fields validation for modals
-            /*call.respondText( // input1 -> block_id
-                """
-                {
-                  "response_action": "errors",
-                  "errors": {
-                    "input1": "You may not select a due date in the past"
-                  }
-                }
-            """.trimIndent(), ContentType.Application.Json, HttpStatusCode.OK
-            )*/
-        }
+          }
+      """.trimIndent(), ContentType.Application.Json, HttpStatusCode.OK
+      )*/
     }
+  }
 }
 
 fun getToken() = System.getenv()[Bot.TOKEN] ?: ""
 
 fun getBotToken() = System.getenv()[Bot.BOT_TOKEN] ?: ""
 
-fun getModal(withTriggerId: String): String {
-    // TODO: extract into separate class
-    return """
-        {
-  "trigger_id": "$withTriggerId",
-  "view": {
-    "type": "modal",
-    "callback_id": "modal-identifier",
-    "title": {
-      "type": "plain_text",
-      "text": "Just a modal"
-    },
-    "submit": {
-    	"type": "plain_text",
-    	"text": "Submit",
-    	"emoji": true
-    },
-    "close": {
-    	"type": "plain_text",
-    	"text": "Cancel",
-    	"emoji": true
-    },
-     "blocks": ${getModalBody()}
-  }
-}
+fun getControlMenuBody(): String {
+  return """
+        [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "You scheduled the order. This is your control menu."
+			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+                    "action_id":"1",
+					"text": {
+						"type": "plain_text",
+						"emoji": false,
+						"text": "Update Order Status"
+					},
+					"value": "update-order-status"
+				},
+				{
+					"type": "button",
+                    "action_id":"2",
+					"text": {
+						"type": "plain_text",
+						"emoji": false,
+						"text": "Update Order Time"
+					},
+					"value": "update-order-time"
+				}
+			]
+		}
+	]
     """.trimIndent()
 }
 
-fun getModalBody(): String {
-    // TODO: extract into separate class
-    //TODO: setup cta/fields custom ids and data
-    return """
-        [
-        	{
-        		"type": "input",
-                "block_id": "input1",
-        		"element": {
-        			"type": "plain_text_input",
-        			"action_id": "sl_input",
-        			"placeholder": {
-        				"type": "plain_text",
-        				"text": "Placeholder text for single-line input"
-        			}
-        		},
-        		"label": {
-        			"type": "plain_text",
-        			"text": "Label"
-        		},
-        		"hint": {
-        			"type": "plain_text",
-        			"text": "Hint text"
-        		}
-        	},
-        	{
-        		"type": "input",
-                "block_id": "input2",
-        		"element": {
-        			"type": "plain_text_input",
-        			"action_id": "ml_input",
-        			"multiline": true,
-        			"placeholder": {
-        				"type": "plain_text",
-        				"text": "Placeholder text for multi-line input"
-        			}
-        		},
-        		"label": {
-        			"type": "plain_text",
-        			"text": "Label"
-        		},
-        		"hint": {
-        			"type": "plain_text",
-        			"text": "Hint text"
-        		}
-        	}
-        ]
+fun getControlMenuMessage(userId: String): String {
+// TODO: extract into separate class
+  return """
+    {
+        "token": "${getBotToken()}",
+        "user": "$userId",
+        "channel": "CR1E4P198",
+        "blocks": ${getControlMenuBody()}
+    }
+}
     """.trimIndent()
 }
 
 fun getMessage(): String {
-    // TODO: extract into separate class
-    return """
+  // TODO: extract into separate class
+  return """
     {
      "channel": "CR1E4P198",
      "blocks": ${getMessageBody()}
@@ -230,8 +236,8 @@ fun getMessage(): String {
 }
 
 fun getMessageBody(): String {
-    //TODO: setup cta/fields custom ids and data
-    return """
+  //TODO: setup cta/fields custom ids and data
+  return """
         [
         	{
         		"type": "section",
@@ -293,3 +299,7 @@ fun getMessageBody(): String {
         ]
     """.trimIndent()
 }
+
+data class CallbackId(@SerializedName("view") val view: View, @SerializedName("user") val user: User)
+data class View(@SerializedName("callback_id") val callbackId: String)
+data class User(@SerializedName("id") val id: String)
