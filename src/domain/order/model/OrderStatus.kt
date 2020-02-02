@@ -1,4 +1,4 @@
-package team.uptech.food.bot.order.state
+package team.uptech.food.bot.domain.order.model
 
 sealed class OrderStatus(data: Any) {
   data class AcceptingOrders(val data: Any) : OrderStatus(data)

@@ -1,4 +1,4 @@
-package team.uptech.food.bot.order.client
+package team.uptech.food.bot.domain.client.model
 
 sealed class ClientAction {
   object Add : ClientAction()

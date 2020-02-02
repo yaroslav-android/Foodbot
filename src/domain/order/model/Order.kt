@@ -1,11 +1,7 @@
 package team.uptech.food.bot.domain.order.model
 
-import team.uptech.food.bot.order.client.Client
-import team.uptech.food.bot.order.client.Reservation
-import team.uptech.food.bot.order.initiation.Basket
-import team.uptech.food.bot.order.initiation.Initiator
-import team.uptech.food.bot.order.initiation.MenuLink
-import team.uptech.food.bot.order.state.OrderStatus
+import team.uptech.food.bot.domain.initiator.model.Basket
+import team.uptech.food.bot.domain.initiator.model.Initiator
 
 data class Order(
   val id: Long,

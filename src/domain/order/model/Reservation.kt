@@ -1,3 +1,3 @@
-package team.uptech.food.bot.order.client
+package team.uptech.food.bot.domain.order.model
 
 class Reservation {}

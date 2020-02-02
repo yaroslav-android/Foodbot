@@ -1,7 +1,5 @@
 package team.uptech.food.bot.data
 
-import domain.order.model.initiation.Initiator
-
 class DataStorage : Storage {
   override suspend fun updateInitiator(initiator: Initiator) {
     // TODO: implement logic

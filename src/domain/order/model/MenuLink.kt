@@ -1,4 +1,4 @@
-package team.uptech.food.bot.order.initiation
+package team.uptech.food.bot.domain.order.model
 
 /* TODO: use bitly to shorten links. But before shortening, parse Restaurant -> name */
 data class MenuLink (

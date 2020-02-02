@@ -1,7 +1,5 @@
-package team.uptech.food.bot.order.state
+package team.uptech.food.bot.domain.order.model
 
-import team.uptech.food.bot.order.components.Restaurant
-import team.uptech.food.bot.order.initiation.MenuLink
 import java.util.*
 
 data class OrderPreview(

@@ -1,4 +1,4 @@
-package team.uptech.food.bot.order.initiation
+package team.uptech.food.bot.domain.initiator.model
 
 import team.uptech.food.bot.data.models.CreditCard
 

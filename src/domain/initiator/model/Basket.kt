@@ -1,7 +1,7 @@
-package team.uptech.food.bot.order.initiation
+package team.uptech.food.bot.domain.initiator.model
 
-import team.uptech.food.bot.order.client.ClientChoice
-import team.uptech.food.bot.order.fee.Fee
+import team.uptech.food.bot.domain.client.model.ClientChoice
+import team.uptech.food.bot.domain.order.model.Fee
 
 data class Basket(
   val clientChoices: List<ClientChoice>,
