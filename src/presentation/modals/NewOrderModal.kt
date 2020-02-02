@@ -1,4 +1,4 @@
-package team.uptech.food.bot.modals
+package team.uptech.food.bot.presentation.modals
 
 class NewOrderModal : BaseModal() {
   private fun getNewOrderModal(triggerId: String): String {

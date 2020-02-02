@@ -1,4 +1,4 @@
-package team.uptech.food.bot.initiation
+package team.uptech.food.bot.order.initiation
 
 import team.uptech.food.bot.order.state.OrderStatus
 

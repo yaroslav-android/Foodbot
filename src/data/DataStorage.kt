@@ -1,6 +1,6 @@
-package team.uptech.food.bot.bot.db
+package team.uptech.food.bot.data
 
-import team.uptech.food.bot.initiation.Initiator
+import domain.order.model.initiation.Initiator
 
 class DataStorage : Storage {
   override suspend fun updateInitiator(initiator: Initiator) {

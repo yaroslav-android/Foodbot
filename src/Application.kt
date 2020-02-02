@@ -32,10 +32,10 @@ import io.ktor.routing.routing
 import org.slf4j.event.Level
 import team.uptech.food.bot.bot.Bot
 import team.uptech.food.bot.bot.BotReplay
-import team.uptech.food.bot.bot.db.DataStorage
-import team.uptech.food.bot.bot.db.Storage
-import team.uptech.food.bot.modals.BaseModal
-import team.uptech.food.bot.modals.NewOrderModal
+import team.uptech.food.bot.data.DataStorage
+import team.uptech.food.bot.data.Storage
+import team.uptech.food.bot.presentation.modals.BaseModal
+import team.uptech.food.bot.presentation.modals.NewOrderModal
 import team.uptech.food.bot.slack.API
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -300,6 +300,7 @@ fun getMessageBody(): String {
     """.trimIndent()
 }
 
+/* TODO: extract from here!!!!! */
 data class CallbackId(@SerializedName("view") val view: View, @SerializedName("user") val user: User)
 data class View(@SerializedName("callback_id") val callbackId: String)
 data class User(@SerializedName("id") val id: String)

@@ -1,4 +1,4 @@
-package team.uptech.food.bot.messages
+package team.uptech.food.bot.presentation.messages
 
 class MessageBuilder {
 }
