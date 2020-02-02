@@ -1,5 +1,7 @@
 package team.uptech.food.bot.data
 
+import team.uptech.food.bot.domain.initiator.model.Initiator
+
 /**
  * Temporary storage instead of real DB
  */
