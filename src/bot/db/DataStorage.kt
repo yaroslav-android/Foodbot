@@ -1,9 +1,17 @@
 package team.uptech.food.bot.bot.db
 
-import org.litote.kmongo.*
+import team.uptech.food.bot.initiation.Initiator
 
 class DataStorage : Storage {
-  val client = KMongo.createClient()
-  val database = client.getDatabase("test")
+  override suspend fun updateInitiator(initiator: Initiator) {
+    // TODO: implement logic
+  }
 
+  override suspend fun updateOrder(orderId: Long) {
+    // TODO: implement logic
+  }
+
+  override suspend fun deleteOrder(orderId: Long) {
+    // TODO: implement logic
+  }
 }

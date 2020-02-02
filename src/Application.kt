@@ -153,7 +153,7 @@ fun Application.module(testing: Boolean = false) {
               "values": {
       */
 
-      // TODO: add fields validation for modals
+      // TODO: add fields validation for presentation.modals
       /*call.respondText( // input1 -> block_id
           """
           {

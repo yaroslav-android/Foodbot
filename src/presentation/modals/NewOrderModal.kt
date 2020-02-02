@@ -2,7 +2,7 @@ package team.uptech.food.bot.modals
 
 class NewOrderModal : BaseModal() {
   private fun getNewOrderModal(triggerId: String): String {
-    // TODO: consider generate id for each user to identify modals by callback_id?
+    // TODO: consider generate id for each user to identify presentation.modals by callback_id?
     return """
             {
                 "trigger_id": "$triggerId",
