@@ -302,5 +302,6 @@ fun getMessageBody(): String {
 
 /* TODO: extract from here!!!!! */
 data class CallbackId(@SerializedName("view") val view: View, @SerializedName("user") val user: User)
+
 data class View(@SerializedName("callback_id") val callbackId: String)
 data class User(@SerializedName("id") val id: String)
