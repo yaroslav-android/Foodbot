@@ -1,4 +1,4 @@
-package team.uptech.food.bot.presentation.errors
+package team.uptech.food.bot.presentation.errors.models
 
 import com.google.gson.annotations.SerializedName
 
