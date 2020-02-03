@@ -35,6 +35,7 @@ import team.uptech.food.bot.bot.BotReplay
 import team.uptech.food.bot.data.DataStorage
 import team.uptech.food.bot.data.Storage
 import team.uptech.food.bot.presentation.modals.BaseModal
+import team.uptech.food.bot.presentation.modals.ModalBuilder
 import team.uptech.food.bot.presentation.modals.NewOrderModal
 import team.uptech.food.bot.slack.API
 
@@ -85,7 +86,7 @@ fun Application.module(testing: Boolean = false) {
         val response = client.call(API.VIEW_OPEN) {
           method = HttpMethod.Post
           header(API.HEADER, API.header(getToken()))
-          body = TextContent(newOrderModal.assemble(triggerId), contentType = ContentType.Application.Json)
+          body = TextContent(ModalBuilder.assembleNewOrder(triggerId), contentType = ContentType.Application.Json)
         }.response
 
         // get "view":{"id":"VS5L99ZD1" to update modal, keep it
@@ -127,7 +128,7 @@ fun Application.module(testing: Boolean = false) {
 //            val userId = parameters[API.USER_ID]
       // TODO: drop all data related to user and his initiated an order.
       //  consider add confirmation dialog if user just wanted to check how it behaves in the middle of the order
-      call.respondText("${userProfile["profile"].asJsonObject["first_name"].asString}, you now able to initiate a new order :stew:")
+      call.respondText("${userProfile["profile"].asJsonObject["real_name"].asString}, you now able to initiate a new order :stew:")
     }
 
     post(Bot.USER_INTERACTIONS) {
