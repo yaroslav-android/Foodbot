@@ -5,7 +5,7 @@ import team.uptech.food.bot.presentation.modals.models.Modal
 class NewOrderModal : BaseModal() {
 
   init {
-    /*createModal {
+    createModal {
       view {
         title {
           text = "New Order :stew:"
@@ -20,7 +20,7 @@ class NewOrderModal : BaseModal() {
 
         }
       }
-    }*/
+    }
   }
 
   private fun getNewOrderModal(triggerId: String): String {

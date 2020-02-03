@@ -8,5 +8,5 @@ class Modal {
   @SerializedName("view")
   var view: View? = null
 
-  fun view(block: View.() -> Unit) = View().apply(block)
+  fun view(block: View.() -> Unit) = View().apply(block).also { view = it }
 }

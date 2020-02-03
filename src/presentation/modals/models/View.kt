@@ -13,9 +13,15 @@ class View {
   var callbackId: String = ""
   @SerializedName("title")
   var title: Title? = null
+  @SerializedName("submit")
+  var submit: Submit? = null
+  @SerializedName("close")
+  var close: Close? = null
+  @SerializedName("blocks")
+  var blocks: List<Section> = listOf()
 
-  fun title(block: Title.() -> Unit) = Title().apply(block)
-  fun submit(block: Submit.() -> Unit) = Submit().apply(block)
-  fun close(block: Close.() -> Unit) = Close().apply(block)
-  fun blocks(block: Blocks.() -> Unit) = Blocks().apply(block)
+  fun title(block: Title.() -> Unit) = Title().apply(block).also { title = it }
+  fun submit(block: Submit.() -> Unit) = Submit().apply(block).also { submit = it }
+  fun close(block: Close.() -> Unit) = Close().apply(block).also { close = it }
+  fun blocks(block: MutableList<Section>.() -> Unit) = mutableListOf<Section>().apply(block).also { blocks = it }
 }
