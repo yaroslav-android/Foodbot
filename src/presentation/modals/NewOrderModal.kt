@@ -1,6 +1,28 @@
 package team.uptech.food.bot.presentation.modals
 
+import team.uptech.food.bot.presentation.modals.models.Modal
+
 class NewOrderModal : BaseModal() {
+
+  init {
+    /*createModal {
+      view {
+        title {
+          text = "New Order :stew:"
+        }
+        submit {
+          text = "Schedule"
+        }
+        close {
+          text = "Cancel"
+        }
+        blocks {
+
+        }
+      }
+    }*/
+  }
+
   private fun getNewOrderModal(triggerId: String): String {
     // TODO: consider generate id for each user to identify presentation.modals by callback_id?
     return """
@@ -129,5 +151,10 @@ class NewOrderModal : BaseModal() {
 
   override fun assemble(triggerId: String): String {
     return getNewOrderModal(triggerId)
+  }
+
+  companion object {
+    fun createModal(block: Modal.() -> Unit) =
+      NewOrderModal().applyHeader(Modal().apply(block))
   }
 }

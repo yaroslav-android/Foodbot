@@ -54,6 +54,8 @@ fun Application.module(testing: Boolean = false) {
   install(CallLogging) {
     level = Level.DEBUG
     filter { call -> call.request.path().startsWith(Bot.NEW_ORDER_PATH) }
+    filter { call -> call.request.path().startsWith(Bot.MANUAL_RESET_PATH) }
+    filter { call -> call.request.path().startsWith(Bot.USER_INTERACTIONS) }
   }
 
   val client = HttpClient(Apache)
