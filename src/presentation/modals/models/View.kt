@@ -1,8 +1,10 @@
 package team.uptech.food.bot.presentation.modals.models
 
 import com.google.gson.annotations.SerializedName
-import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
+import team.uptech.food.bot.presentation.models.Close
+import team.uptech.food.bot.presentation.models.Section
+import team.uptech.food.bot.presentation.models.Submit
+import team.uptech.food.bot.presentation.models.Title
 
 
 const val TYPE_MODAL = "modal"
@@ -25,12 +27,4 @@ class View {
   fun submit(block: Submit.() -> Unit) = Submit().apply(block).also { submit = it }
   fun close(block: Close.() -> Unit) = Close().apply(block).also { close = it }
   fun blocks(block: MutableList<Section>.() -> Unit) = blocks.apply(block)
-
-  /**
-   * Use only within `blocks` only!
-   */
-  inline fun <reified T : Section> item(block: T.() -> Unit) =
-    getInstance(T::class).apply(block).also { blocks.add(it) }
-
-  fun <T : Section> getInstance(cls: KClass<T>) = cls.createInstance()
 }

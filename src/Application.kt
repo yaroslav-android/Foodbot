@@ -22,7 +22,6 @@ import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.path
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
 import io.ktor.response.respondText
@@ -34,10 +33,11 @@ import team.uptech.food.bot.bot.Bot
 import team.uptech.food.bot.bot.BotReplay
 import team.uptech.food.bot.data.DataStorage
 import team.uptech.food.bot.data.Storage
-import team.uptech.food.bot.presentation.modals.BaseModal
+import team.uptech.food.bot.presentation.messages.MessageBuilder
 import team.uptech.food.bot.presentation.modals.ModalBuilder
-import team.uptech.food.bot.presentation.modals.NewOrderModal
 import team.uptech.food.bot.slack.API
+import team.uptech.food.bot.utils.getBotToken
+import team.uptech.food.bot.utils.getToken
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -54,17 +54,12 @@ fun Application.module(testing: Boolean = false) {
 
   install(CallLogging) {
     level = Level.DEBUG
-    filter { call -> call.request.path().startsWith(Bot.NEW_ORDER_PATH) }
-    filter { call -> call.request.path().startsWith(Bot.MANUAL_RESET_PATH) }
-    filter { call -> call.request.path().startsWith(Bot.USER_INTERACTIONS) }
   }
 
   val client = HttpClient(Apache)
   val botReplay = BotReplay()
   // TODO: put all needed data from this object into Initiator
   var userProfile = JsonObject()
-  val newOrderModal: BaseModal = NewOrderModal()
-
   val storage: Storage = DataStorage()
 
   routing {
@@ -141,7 +136,10 @@ fun Application.module(testing: Boolean = false) {
         val response = client.call(API.SEND_MSG_EPH) {
           method = HttpMethod.Post
           header(API.HEADER, API.header(getToken()))
-          body = TextContent(getControlMenuMessage(view.user.id), contentType = ContentType.Application.Json)
+          body = TextContent(
+            MessageBuilder.assembleOrderSettings(getBotToken(), view.user.id),
+            contentType = ContentType.Application.Json
+          )
         }.response
         log.debug(response.call.receive())
 
@@ -150,160 +148,21 @@ fun Application.module(testing: Boolean = false) {
         call.respond(HttpStatusCode.OK, "")
       }
 
-      /* user input from modal ->
+      /* GET user input from modal BY ->
       "view": {
           "state": {
-              "values": {
+              "values": {}
+           }
+       }
       */
 
       // TODO: add fields validation for presentation.modals
-      /*call.respondText( // input1 -> block_id
-          """
-          {
-            "response_action": "errors",
-            "errors": {
-              "input1": "You may not select a due date in the past"
-            }
-          }
-      """.trimIndent(), ContentType.Application.Json, HttpStatusCode.OK
-      )*/
+//      call.respondText(ErrorBuilder.assembleNewOrderError(), ContentType.Application.Json, HttpStatusCode.OK)
     }
   }
 }
 
-fun getToken() = System.getenv()[Bot.TOKEN] ?: ""
-
-fun getBotToken() = System.getenv()[Bot.BOT_TOKEN] ?: ""
-
-fun getControlMenuBody(): String {
-  return """
-        [
-		{
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": "You scheduled the order. This is your control menu."
-			}
-		},
-		{
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-                    "action_id":"1",
-					"text": {
-						"type": "plain_text",
-						"emoji": false,
-						"text": "Update Order Status"
-					},
-					"value": "update-order-status"
-				},
-				{
-					"type": "button",
-                    "action_id":"2",
-					"text": {
-						"type": "plain_text",
-						"emoji": false,
-						"text": "Update Order Time"
-					},
-					"value": "update-order-time"
-				}
-			]
-		}
-	]
-    """.trimIndent()
-}
-
-fun getControlMenuMessage(userId: String): String {
-// TODO: extract into separate class
-  return """
-    {
-        "token": "${getBotToken()}",
-        "user": "$userId",
-        "channel": "CR1E4P198",
-        "blocks": ${getControlMenuBody()}
-    }
-}
-    """.trimIndent()
-}
-
-fun getMessage(): String {
-  // TODO: extract into separate class
-  return """
-    {
-     "channel": "CR1E4P198",
-     "blocks": ${getMessageBody()}
-    }
-}
-    """.trimIndent()
-}
-
-fun getMessageBody(): String {
-  //TODO: setup cta/fields custom ids and data
-  return """
-        [
-        	{
-        		"type": "section",
-        		"text": {
-        			"type": "mrkdwn",
-        			"text": "You have a new request:\n*<fakeLink.toEmployeeProfile.com|Fred Enriquez - New device request>*"
-        		}
-        	},
-        	{
-        		"type": "section",
-        		"fields": [
-        			{
-        				"type": "mrkdwn",
-        				"text": "*Type:*\nComputer (laptop)"
-        			},
-        			{
-        				"type": "mrkdwn",
-        				"text": "*When:*\nSubmitted Aut 10"
-        			},
-        			{
-        				"type": "mrkdwn",
-        				"text": "*Last Update:*\nMar 10, 2015 (3 years, 5 months)"
-        			},
-        			{
-        				"type": "mrkdwn",
-        				"text": "*Reason:*\nAll vowel keys aren't working."
-        			},
-        			{
-        				"type": "mrkdwn",
-        				"text": "*Specs:*\n\"Cheetah Pro 15\" - Fast, really fast\""
-        			}
-        		]
-        	},
-        	{
-        		"type": "actions",
-        		"elements": [
-        			{
-        				"type": "button",
-        				"text": {
-        					"type": "plain_text",
-        					"emoji": true,
-        					"text": "Approve"
-        				},
-        				"style": "primary",
-        				"value": "click_me_123"
-        			},
-        			{
-        				"type": "button",
-        				"text": {
-        					"type": "plain_text",
-        					"emoji": true,
-        					"text": "Deny"
-        				},
-        				"style": "danger",
-        				"value": "click_me_123"
-        			}
-        		]
-        	}
-        ]
-    """.trimIndent()
-}
-
-/* TODO: extract from here!!!!! */
+/* TODO: extract from here to data layer */
 data class CallbackId(@SerializedName("view") val view: View, @SerializedName("user") val user: User)
 
 data class View(@SerializedName("callback_id") val callbackId: String)

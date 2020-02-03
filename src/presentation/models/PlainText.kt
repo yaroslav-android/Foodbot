@@ -1,4 +1,4 @@
-package team.uptech.food.bot.presentation.modals.models
+package team.uptech.food.bot.presentation.models
 
 import com.google.gson.annotations.SerializedName
 

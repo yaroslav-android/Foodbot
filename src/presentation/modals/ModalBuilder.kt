@@ -1,6 +1,7 @@
 package team.uptech.food.bot.presentation.modals
 
-import team.uptech.food.bot.presentation.modals.models.SectionInput
+import team.uptech.food.bot.presentation.models.SectionInput
+import team.uptech.food.bot.utils.block
 
 object ModalBuilder {
 
@@ -24,7 +25,7 @@ object ModalBuilder {
         }
 
         blocks {
-          item<SectionInput> {
+          block<SectionInput> {
             blockId = "amount_of_ppl_block"
 
             element {
@@ -41,7 +42,7 @@ object ModalBuilder {
             }
           }
 
-          item<SectionInput> {
+          block<SectionInput> {
             blockId = "time_picker_block"
 
             element {
@@ -58,7 +59,7 @@ object ModalBuilder {
             }
           }
 
-          item<SectionInput> {
+          block<SectionInput> {
             blockId = "menu_link_block"
             optional = true
 
@@ -76,7 +77,7 @@ object ModalBuilder {
             }
           }
 
-          item<SectionInput> {
+          block<SectionInput> {
             blockId = "delivery_fee_block"
 
             element {
@@ -94,7 +95,7 @@ object ModalBuilder {
             }
           }
 
-          item<SectionInput> {
+          block<SectionInput> {
             blockId = "card_number_block"
 
             element {
