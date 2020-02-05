@@ -32,7 +32,7 @@ import team.uptech.food.bot.data.Storage
 import team.uptech.food.bot.presentation.messages.MessageBuilder
 import team.uptech.food.bot.presentation.modals.ModalBuilder
 import team.uptech.food.bot.slack.API
-import team.uptech.food.bot.utils.configurate
+import team.uptech.food.bot.utils.configure
 import team.uptech.food.bot.utils.getBotToken
 import team.uptech.food.bot.utils.getToken
 
@@ -42,7 +42,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused")
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
-  configurate()
+  configure()
 
   val client = HttpClient(Apache)
   val botReplay = BotReplay()

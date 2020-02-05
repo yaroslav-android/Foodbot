@@ -13,7 +13,7 @@ import team.uptech.food.bot.bot.Bot
 fun Application.getToken() = System.getenv()[Bot.TOKEN] ?: ""
 fun Application.getBotToken() = System.getenv()[Bot.BOT_TOKEN] ?: ""
 
-fun Application.configurate() {
+fun Application.configure() {
   install(DefaultHeaders)
 
   install(ContentNegotiation) {
