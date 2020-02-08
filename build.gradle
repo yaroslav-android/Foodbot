@@ -30,19 +30,30 @@ repositories {
 }
 
 dependencies {
+
+    /* Kotlin */
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-    implementation "io.ktor:ktor-server-netty:$ktor_version"
-    implementation "ch.qos.logback:logback-classic:$logback_version"
+    /* Core */
     implementation "io.ktor:ktor-server-core:$ktor_version"
-    implementation "io.ktor:ktor-html-builder:$ktor_version"
-    implementation "org.jetbrains:kotlin-css-jvm:1.0.0-pre.31-kotlin-1.2.41"
-    implementation "io.ktor:ktor-gson:$ktor_version"
     implementation "io.ktor:ktor-client-core:$ktor_version"
-    implementation "io.ktor:ktor-client-json:$ktor_version"
-    implementation "io.ktor:ktor-client-serialization:$ktor_version"
     implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
     implementation "io.ktor:ktor-client-apache:$ktor_version"
 
+    /* Json */
+    implementation "io.ktor:ktor-client-json:$ktor_version"
+    implementation "io.ktor:ktor-gson:$ktor_version"
+    implementation "io.ktor:ktor-client-serialization:$ktor_version"
+
+    /* DI */
+    def dagger_version = "2.26"
+    api "com.google.dagger:dagger:$dagger_version"
+    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
+
+    /* Other */
+    implementation "io.ktor:ktor-server-netty:$ktor_version"
+    implementation "ch.qos.logback:logback-classic:$logback_version"
+
+    /* Tests */
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
 }
