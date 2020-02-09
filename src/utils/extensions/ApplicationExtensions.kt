@@ -1,4 +1,4 @@
-package team.uptech.food.bot.utils
+package team.uptech.food.bot.utils.extensions
 
 import io.ktor.application.Application
 import io.ktor.application.install

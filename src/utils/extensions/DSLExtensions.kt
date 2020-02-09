@@ -1,4 +1,4 @@
-package team.uptech.food.bot.utils
+package team.uptech.food.bot.utils.extensions
 
 import team.uptech.food.bot.presentation.models.Element
 import team.uptech.food.bot.presentation.models.Section

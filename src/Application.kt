@@ -27,17 +27,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import team.uptech.food.bot.bot.Bot
 import team.uptech.food.bot.bot.BotReplay
-import team.uptech.food.bot.data.DataStorage
 import team.uptech.food.bot.data.Storage
+import team.uptech.food.bot.di.Injector.injectApplication
 import team.uptech.food.bot.presentation.messages.MessageBuilder
 import team.uptech.food.bot.presentation.modals.ModalBuilder
 import team.uptech.food.bot.slack.API
-import team.uptech.food.bot.utils.configure
-import team.uptech.food.bot.utils.getBotToken
-import team.uptech.food.bot.utils.getToken
-
+import team.uptech.food.bot.utils.extensions.configure
+import team.uptech.food.bot.utils.extensions.getBotToken
+import team.uptech.food.bot.utils.extensions.getToken
+import javax.inject.Inject
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+
+class EntryPoint {
+
+  @Inject
+  lateinit var storage: Storage
+  @Inject
+  lateinit var botReplay: BotReplay
+
+  init {
+    injectApplication()?.inject(this)
+  }
+}
 
 @Suppress("unused")
 @kotlin.jvm.JvmOverloads
@@ -45,13 +57,12 @@ fun Application.module(testing: Boolean = false) {
   configure()
 
   val client = HttpClient(Apache)
-  val botReplay = BotReplay()
+  val entry = EntryPoint()
   // TODO: put all needed data from this object into Initiator
   var userProfile = JsonObject()
-  val storage: Storage = DataStorage()
 
   routing {
-    get(Bot.HOME_PATH) { call.respondText(botReplay.hello(), contentType = ContentType.Text.Plain) }
+    get(Bot.HOME_PATH) { call.respondText(entry.botReplay.hello(), contentType = ContentType.Text.Plain) }
 
     post(Bot.NEW_ORDER_PATH) {
       // TODO: save CHANNEL_ID, USER_ID as initiator

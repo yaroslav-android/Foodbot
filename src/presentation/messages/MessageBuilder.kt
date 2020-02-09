@@ -3,8 +3,8 @@ package team.uptech.food.bot.presentation.messages
 import team.uptech.food.bot.presentation.models.ElementButton
 import team.uptech.food.bot.presentation.models.SectionButton
 import team.uptech.food.bot.presentation.models.SectionText
-import team.uptech.food.bot.utils.block
-import team.uptech.food.bot.utils.element
+import team.uptech.food.bot.utils.extensions.block
+import team.uptech.food.bot.utils.extensions.element
 
 object MessageBuilder {
   fun assembleOrderSettings(
