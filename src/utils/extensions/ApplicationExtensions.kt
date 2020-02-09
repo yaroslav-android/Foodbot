@@ -10,8 +10,8 @@ import org.slf4j.event.Level
 import team.uptech.food.bot.bot.Bot
 
 
-fun Application.getToken() = System.getenv()[Bot.TOKEN] ?: ""
-fun Application.getBotToken() = System.getenv()[Bot.BOT_TOKEN] ?: ""
+fun Any.getToken() = System.getenv()[Bot.TOKEN] ?: ""
+fun Any.getBotToken() = System.getenv()[Bot.BOT_TOKEN] ?: ""
 
 fun Application.configure() {
   install(DefaultHeaders)
