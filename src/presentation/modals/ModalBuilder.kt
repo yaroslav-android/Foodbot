@@ -1,7 +1,7 @@
 package team.uptech.food.bot.presentation.modals
 
 import team.uptech.food.bot.presentation.models.SectionInput
-import team.uptech.food.bot.utils.block
+import team.uptech.food.bot.utils.extensions.block
 
 object ModalBuilder {
 
