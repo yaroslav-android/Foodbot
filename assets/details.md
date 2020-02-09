@@ -16,3 +16,4 @@
 `/neworder` - creates new order, opens modal.<br/>
 `/manualreset` - cleans orders that stucked.<br/>
 `/sharefeedback` - allows send feedback.<br/>
+`/announcement` - allows initiator to send to all clients a message with some important news.<br/>
