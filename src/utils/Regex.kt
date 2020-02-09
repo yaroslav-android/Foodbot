@@ -14,6 +14,6 @@ object Regex {
    */
   fun slackEscapedIdTemplate(id: String, name: String) = "<@$id|$name>"
 
-  fun matchSlackId(id: String) = SLACK_ID_REGEX.matcher(id).takeIf { it.matches() }?.group()
+  fun matchSlackId(id: String) = SLACK_ID_REGEX.matcher(id).takeIf { it.matches() }?.group()?.substring(1)
 
 }
