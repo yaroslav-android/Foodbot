@@ -26,6 +26,7 @@ object MessageBuilder {
 
         block<SectionButton> {
           blockId = "update_order_actions"
+
           elements {
             element<ElementButton> {
               actionId = "update_order_status_cta"
@@ -39,6 +40,7 @@ object MessageBuilder {
             element<ElementButton> {
               actionId = "update_order_time_cta"
               value = "update-order-time"
+
               text {
                 text = "Update Order Time"
               }
