@@ -8,7 +8,8 @@ class DataStorage : Storage {
   private val orders: MutableList<Order> = mutableListOf()
 
   override suspend fun updateInitiator(initiator: Initiator): Transaction {
-    TODO("not implemented logic")
+    // TODO implement logic
+    return Transaction.Success
   }
 
   override suspend fun insertOrder(order: Order): Transaction {

@@ -14,6 +14,8 @@ object API {
   const val TRIGGER_ID = "trigger_id"
   const val CHANNEL_ID = "channel_id"
   const val USER_ID = "user_id"
+  const val HEADER_TOKEN = "token"
+  const val HEADER_USER = "user"
 
   // Other
   const val USER_PROFILE = "https://slack.com/api/users.profile.get"
