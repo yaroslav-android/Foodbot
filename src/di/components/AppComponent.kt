@@ -17,6 +17,4 @@ interface AppComponent {
   fun provideBotReplay(): BotReplay
   fun provideApplication(): Application
   fun provideHttpClient(): HttpClient
-
-  fun plusNewOrderComponent(): NewOrderComponent
 }
